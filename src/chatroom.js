@@ -124,88 +124,120 @@ function Chatroom() {
   };
 
   return (
-    <div style={{ 
-      padding: '20px', 
-      height: '100vh', 
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    }}>
-      {/* 上方返回與標題 */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => auth.signOut()}>登出</button>
-          <button onClick={() => navigate(-1)}>⬅ 返回至聊天列表</button>
+    <>
+      <style>{`
+        @media (max-width: 600px) {
+          .chatroom-main {
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          .chatroom-left, .chatroom-right {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .chatroom-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+          .chatroom-header h2 {
+            text-align: left !important;
+            font-size: 1.2rem !important;
+            margin-top: 8px !important;
+          }
+          .chatroom-btns {
+            gap: 4px !important;
+          }
+          .chatroom-msglist, .chatroom-memberlist {
+            max-height: 200px !important;
+            font-size: 0.95rem !important;
+          }
+          .chatroom-input input, .chatroom-invite input {
+            font-size: 1rem !important;
+            padding: 6px !important;
+          }
+        }
+      `}</style>
+      <div style={{
+        padding: '20px',
+        height: '100vh',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        <div className="chatroom-header" style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+          <div className="chatroom-btns" style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => auth.signOut()}>登出</button>
+            <button onClick={() => navigate(-1)}>⬅ 返回至聊天列表</button>
+          </div>
+          <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{chatroomName || '聊天室'}</h2>
         </div>
-        <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{chatroomName || '聊天室'}</h2>
-      </div>
 
-      {/* 主體左右區塊 */}
-      <div style={{ display: 'flex', gap: '20px', flex: 1, overflow: 'hidden' }}>
-        {/* 左側訊息區 */}
-        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-          <div style={{
-            flex: 1,
-            border: '1px solid #ccc',
-            padding: '10px',
-            overflowY: 'auto',
-            marginBottom: 0,
-            minHeight: 0
-          }}>
-            {messages.map((msg) => (
-              <div key={msg.id} style={{ marginBottom: '10px' }}>
-                <strong>{msg.email}</strong>：{msg.text}
-              </div>
-            ))}
+        <div className="chatroom-main" style={{ display: 'flex', gap: '20px', flex: 1, overflow: 'hidden' }}>
+          <div className="chatroom-left" style={{ flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+            <div className="chatroom-msglist" style={{
+              flex: 1,
+              border: '1px solid #ccc',
+              padding: '10px',
+              overflowY: 'auto',
+              marginBottom: 0,
+              minHeight: 0
+            }}>
+              {messages.map((msg) => (
+                <div key={msg.id} style={{ marginBottom: '10px' }}>
+                  <strong>{msg.email}</strong>：{msg.text}
+                </div>
+              ))}
+            </div>
+
+            <form className="chatroom-input" onSubmit={sendMessage} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '8px 0', background: '#fff' }}>
+              <input
+                type="text"
+                value={message}
+                placeholder="輸入訊息"
+                onChange={(e) => setMessage(e.target.value)}
+                style={{ flex: 1, padding: '8px' }}
+              />
+              <button type="submit" style={{ marginLeft: '8px' }}>送出</button>
+            </form>
           </div>
 
-          <form onSubmit={sendMessage} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '8px 0', background: '#fff' }}>
-            <input
-              type="text"
-              value={message}
-              placeholder="輸入訊息"
-              onChange={(e) => setMessage(e.target.value)}
-              style={{ flex: 1, padding: '8px' }}
-            />
-            <button type="submit" style={{ marginLeft: '8px' }}>送出</button>
-          </form>
-        </div>
+          <div className="chatroom-right" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div className="chatroom-memberlist" style={{ 
+              maxHeight: 'calc(100vh - 300px)', 
+              overflowY: 'auto',
+              border: '1px solid #ccc',
+              padding: '10px',
+              marginBottom: '10px'
+            }}>
+              <h4>聊天室成員：</h4>
+              {members.length > 0 ? (
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  {members.map((member, index) => (
+                    <li key={index}>{member}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>暫無成員</p>
+              )}
+            </div>
 
-        {/* 右側成員與邀請區 */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ 
-            maxHeight: 'calc(100vh - 300px)', 
-            overflowY: 'auto',
-            border: '1px solid #ccc',
-            padding: '10px',
-            marginBottom: '10px'
-          }}>
-            <h4>聊天室成員：</h4>
-            {members.length > 0 ? (
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {members.map((member, index) => (
-                  <li key={index}>{member}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>暫無成員</p>
-            )}
+            <form className="chatroom-invite" onSubmit={inviteMember}>
+              <input
+                type="email"
+                placeholder="輸入要邀請的 Email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' }}
+              />
+              <button type="submit" style={{ width: '100%' }}>邀請成員</button>
+            </form>
           </div>
-
-          <form onSubmit={inviteMember}>
-            <input
-              type="email"
-              placeholder="輸入要邀請的 Email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              style={{ width: '100%', padding: '8px', marginBottom: '8px' }}
-            />
-            <button type="submit" style={{ width: '100%' }}>邀請成員</button>
-          </form>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
