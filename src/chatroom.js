@@ -73,6 +73,27 @@ function Chatroom() {
     };
   }, [chatroomId, navigate]);
 
+  useEffect(() => {
+    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!messages.length) return;
+    const latestMsg = messages[messages.length - 1];
+    if (
+      latestMsg.email !== auth.currentUser.email &&
+      document.visibilityState !== 'visible' &&
+      Notification.permission === 'granted'
+    ) {
+      new Notification(`來自 ${latestMsg.email} 的新訊息`, {
+        body: latestMsg.text
+        // icon: '/icon.png' // 你可以加icon在public資料夾
+      });
+    }
+  }, [messages]);
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
