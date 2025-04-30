@@ -11,29 +11,24 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate
 } from 'react-router-dom';
 
 import ChatroomList from './ChatroomList';
 import Chatroom from './chatroom';
 
-function AuthGate() {
+function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   // 監聽登入狀態
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        navigate('/');
-      }
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -53,17 +48,28 @@ function AuthGate() {
   };
 
   if (!user) {
+    // 還沒登入的話顯示登入／註冊頁
     return (
-      <div className="App">
+      <div className="App" style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center', padding: '40px' }}>
         <h1>{isRegistering ? '註冊' : '登入'}</h1>
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
           <div>
             <label>Email：</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div>
             <label>密碼：</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
           <button type="submit">{isRegistering ? '註冊' : '登入'}</button>
         </form>
@@ -76,20 +82,19 @@ function AuthGate() {
     );
   }
 
-  return (
-    <div>
-      <button onClick={() => signOut(auth)}>登出</button>
-    </div>
-  );
-}
-
-function App() {
+  // 已經登入的話，顯示聊天室頁面（可以切換不同聊天室）
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<><AuthGate /><ChatroomList /></>} />
-        <Route path="/chatroom/:chatroomId" element={<><AuthGate /><Chatroom /></>} />
-      </Routes>
+      <div style={{ padding: '20px' }}>
+        <button onClick={() => signOut(auth)} style={{ marginBottom: '20px' }}>
+          登出
+        </button>
+
+        <Routes>
+          <Route path="/" element={<ChatroomList />} />
+          <Route path="/chatroom/:chatroomId" element={<Chatroom />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

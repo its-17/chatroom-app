@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from './firebase';
+import { db, auth } from './firebase'; // ⚡ 加 auth，因為要拿登入者資訊
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +26,8 @@ function ChatroomList() {
 
     try {
       const docRef = await addDoc(collection(db, 'chatrooms'), {
-        name: newChatroomName
+        name: newChatroomName,
+        members: [auth.currentUser.email] // ⚡ 建立聊天室時直接加入自己
       });
       setNewChatroomName('');
       navigate(`/chatroom/${docRef.id}`);
@@ -36,7 +37,7 @@ function ChatroomList() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', textAlign: 'center' }}>
       <h1>聊天室列表</h1>
 
       <form onSubmit={createChatroom} style={{ marginBottom: '20px' }}>
