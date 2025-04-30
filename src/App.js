@@ -86,12 +86,17 @@ function App() {
   return (
     <Router>
       <div style={{ padding: '20px' }}>
-        <button onClick={() => signOut(auth)} style={{ marginBottom: '20px' }}>
-          登出
-        </button>
-
         <Routes>
-          <Route path="/" element={<ChatroomList />} />
+          <Route path="/" element={
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '8px' }}>
+                <button onClick={() => signOut(auth)}>
+                  登出
+                </button>
+              </div>
+              <ChatroomList />
+            </>
+          } />
           <Route path="/chatroom/:chatroomId" element={<Chatroom />} />
         </Routes>
       </div>

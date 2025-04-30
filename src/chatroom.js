@@ -124,25 +124,34 @@ function Chatroom() {
   };
 
   return (
-    <div style={{ padding: '20px', height: '100vh', boxSizing: 'border-box' }}>
+    <div style={{ 
+      padding: '20px', 
+      height: '100vh', 
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
       {/* 上方返回與標題 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <button onClick={() => navigate(-1)}>⬅ 返回上一頁</button>
-        <h2>{chatroomName || '聊天室'}</h2>
-        <div style={{ width: '80px' }} />
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => auth.signOut()}>登出</button>
+          <button onClick={() => navigate(-1)}>⬅ 返回至聊天列表</button>
+        </div>
+        <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{chatroomName || '聊天室'}</h2>
       </div>
 
       {/* 主體左右區塊 */}
-      <div style={{ display: 'flex', gap: '20px', height: 'calc(100% - 80px)' }}>
+      <div style={{ display: 'flex', gap: '20px', flex: 1, overflow: 'hidden' }}>
         {/* 左側訊息區 */}
-        <div style={{ flex: 2, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ 
-            flex: 1, 
-            border: '1px solid #ccc', 
-            padding: '10px', 
-            overflowY: 'auto', 
-            marginBottom: '8px',
-            maxHeight: 'calc(100vh - 200px)'
+        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+          <div style={{
+            flex: 1,
+            border: '1px solid #ccc',
+            padding: '10px',
+            overflowY: 'auto',
+            marginBottom: 0,
+            minHeight: 0
           }}>
             {messages.map((msg) => (
               <div key={msg.id} style={{ marginBottom: '10px' }}>
@@ -151,7 +160,7 @@ function Chatroom() {
             ))}
           </div>
 
-          <form onSubmit={sendMessage} style={{ display: 'flex' }}>
+          <form onSubmit={sendMessage} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '8px 0', background: '#fff' }}>
             <input
               type="text"
               value={message}
