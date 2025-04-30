@@ -10,7 +10,8 @@ import {
   orderBy,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  updateDoc as updateMessageDoc
 } from 'firebase/firestore';
 
 function Chatroom() {
@@ -22,6 +23,7 @@ function Chatroom() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [members, setMembers] = useState([]);
   const hasRedirectedRef = useRef(false);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     let unsubMessages = null;
@@ -144,6 +146,26 @@ function Chatroom() {
     }
   };
 
+  // 收回訊息功能
+  const unsendMessage = async (msgId, text) => {
+    const msgRef = doc(db, 'chatrooms', chatroomId, 'messages', msgId);
+    await updateMessageDoc(msgRef, {
+      originalText: text,
+      text: '此訊息已被收回',
+      retracted: true
+    });
+  };
+
+  // 復原訊息功能
+  const restoreMessage = async (msgId, originalText) => {
+    const msgRef = doc(db, 'chatrooms', chatroomId, 'messages', msgId);
+    await updateMessageDoc(msgRef, {
+      text: originalText,
+      retracted: false,
+      originalText: ''
+    });
+  };
+
   return (
     <>
       <style>{`
@@ -206,11 +228,39 @@ function Chatroom() {
               marginBottom: 0,
               minHeight: 0
             }}>
-              {messages.map((msg) => (
-                <div key={msg.id} style={{ marginBottom: '10px' }}>
-                  <strong>{msg.email}</strong>：{msg.text}
-                </div>
-              ))}
+              <input
+                type="text"
+                placeholder="搜尋訊息內容"
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
+                style={{ width: '100%', marginBottom: '10px', padding: '6px', boxSizing: 'border-box' }}
+              />
+              {messages
+                .filter(msg =>
+                  !searchText ||
+                  (msg.text && msg.text.toLowerCase().includes(searchText.toLowerCase())) ||
+                  (msg.originalText && msg.originalText.toLowerCase().includes(searchText.toLowerCase()))
+                )
+                .map((msg) => (
+                  <div key={msg.id} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+                    <strong>{msg.email}</strong>：
+                    {msg.retracted ? (
+                      <>
+                        <span style={{ color: '#888', fontStyle: 'italic' }}>{msg.text}</span>
+                        {msg.email === auth.currentUser.email && msg.originalText && (
+                          <button onClick={() => restoreMessage(msg.id, msg.originalText)} style={{ marginLeft: 8, fontSize: '0.9em' }}>復原</button>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {msg.text}
+                        {msg.email === auth.currentUser.email && (
+                          <button onClick={() => unsendMessage(msg.id, msg.text)} style={{ marginLeft: 8, fontSize: '0.9em' }}>收回</button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
             </div>
 
             <form className="chatroom-input" onSubmit={sendMessage} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '8px 0', background: '#fff' }}>
