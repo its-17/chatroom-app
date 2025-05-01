@@ -92,8 +92,21 @@ function App() {
         boxSizing: 'border-box',
         overflow: 'hidden'
       }}>
-        <div style={{ 
-          width: '300px', 
+        <style>{`
+          @media (max-width: 768px) {
+            .chatroom-list-container {
+              width: 120px !important;
+              min-width: 120px !important;
+            }
+            .main-content {
+              flex: 1 !important;
+              min-width: 0 !important;
+            }
+          }
+        `}</style>
+        <div className="chatroom-list-container" style={{ 
+          width: '300px',
+          minWidth: '300px',
           display: 'flex', 
           flexDirection: 'column',
           borderRight: '1px solid #e0e0e0'
@@ -101,8 +114,8 @@ function App() {
           <ChatroomList />
         </div>
         
-        <div style={{ 
-          flex: 1, 
+        <div className="main-content" style={{ 
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',

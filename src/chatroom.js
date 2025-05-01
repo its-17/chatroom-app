@@ -170,47 +170,57 @@ function Chatroom() {
     <>
       <style>{`
         @media (max-width: 768px) {
-          .chatroom-main {
+          .chatroom-container {
+            display: flex !important;
             flex-direction: column !important;
-          }
-          .chatroom-left, .chatroom-right {
-            width: 100% !important;
-            max-width: none !important;
-          }
-          .chatroom-right {
-            min-height: auto !important;
-          }
-          .chatroom-memberlist {
-            max-height: 200px !important;
+            height: 100% !important;
           }
           .chatroom-header {
-            padding: 10px 0 !important;
+            flex: 0 0 auto !important;
+            padding: 10px !important;
           }
-          .chatroom-header h2 {
-            font-size: 20px !important;
+          .chatroom-main {
+            flex: 1 0 0 !important;
+            min-height: 0 !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            padding: 10px !important;
+          }
+          .chatroom-left {
+            flex: 1 0 0 !important;
+            min-height: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
           }
           .chatroom-msglist {
+            flex: 1 0 0 !important;
+            min-height: 0 !important;
             padding: 10px !important;
           }
           .chatroom-input {
-            margin-top: 10px !important;
+            flex: 0 0 auto !important;
+            padding: 10px !important;
           }
-          .chatroom-input input {
-            padding: 8px !important;
+          .chatroom-right {
+            flex: 0 0 auto !important;
+            height: auto !important;
+            max-height: 200px !important;
+            overflow-y: auto !important;
+          }
+          .chatroom-memberlist {
+            max-height: none !important;
           }
         }
       `}</style>
-      <div style={{
+      <div className="chatroom-container" style={{
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        padding: '20px'
+        flexDirection: 'column'
       }}>
         <div className="chatroom-header" style={{ 
-          padding: '0 0 20px 0',
+          padding: '20px',
           borderBottom: '1px solid #e0e0e0',
-          marginBottom: '20px'
+          flex: '0 0 auto'
         }}>
           <h2 style={{ 
             margin: '0', 
@@ -225,27 +235,26 @@ function Chatroom() {
         <div className="chatroom-main" style={{ 
           display: 'flex',
           gap: '20px',
-          flex: 1,
-          overflow: 'hidden',
-          minHeight: 0
+          padding: '20px',
+          flex: '1 0 0',
+          minHeight: 0,
+          overflow: 'hidden'
         }}>
           <div className="chatroom-left" style={{ 
-            flex: 1,
+            flex: '1 0 0',
+            minHeight: 0,
             display: 'flex',
-            flexDirection: 'column',
-            minWidth: 0,
-            overflow: 'hidden'
+            flexDirection: 'column'
           }}>
             <div className="chatroom-msglist" style={{
-              flex: 1,
+              flex: '1 0 0',
+              minHeight: 0,
               border: '1px solid #e0e0e0',
               borderRadius: '4px',
               padding: '20px',
-              overflowY: 'auto',
               marginBottom: '20px',
-              minHeight: 0,
               background: 'white',
-              position: 'relative'
+              overflowY: 'auto'
             }}>
               <div style={{
                 position: 'sticky',
@@ -334,49 +343,53 @@ function Chatroom() {
               </div>
             </div>
 
-            <form 
-              className="chatroom-input" 
-              onSubmit={sendMessage} 
-              style={{ 
-                display: 'flex',
-                gap: '12px'
-              }}
-            >
-              <input
-                type="text"
-                value={message}
-                placeholder={`以 ${auth.currentUser.email} 的身分輸入訊息...`}
-                onChange={(e) => setMessage(e.target.value)}
+            <div className="chatroom-input" style={{ 
+              flex: '0 0 auto'
+            }}>
+              <form 
+                onSubmit={sendMessage} 
                 style={{ 
-                  flex: 1,
-                  padding: '12px',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '4px',
-                  fontSize: '14px'
-                }}
-              />
-              <button 
-                type="submit"
-                style={{ 
-                  padding: '0 24px',
-                  whiteSpace: 'nowrap',
-                  background: '#FFF18A',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  display: 'flex',
+                  gap: '12px'
                 }}
               >
-                送出
-              </button>
-            </form>
+                <input
+                  type="text"
+                  value={message}
+                  placeholder={`以 ${auth.currentUser.email} 的身分輸入訊息...`}
+                  onChange={(e) => setMessage(e.target.value)}
+                  style={{ 
+                    flex: 1,
+                    padding: '12px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                />
+                <button 
+                  type="submit"
+                  style={{ 
+                    padding: '0 24px',
+                    whiteSpace: 'nowrap',
+                    background: '#FFF18A',
+                    color: '#000000',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  送出
+                </button>
+              </form>
+            </div>
           </div>
 
           <div className="chatroom-right" style={{ 
             width: '250px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '20px'
+            gap: '20px',
+            flex: '0 0 auto'
           }}>
             <div className="chatroom-memberlist" style={{ 
               flex: 1,
