@@ -206,6 +206,7 @@ function Chatroom() {
             height: auto !important;
             max-height: 200px !important;
             overflow-y: auto !important;
+            width: 100% !important;
           }
           .chatroom-memberlist {
             max-height: none !important;
@@ -385,7 +386,7 @@ function Chatroom() {
           </div>
 
           <div className="chatroom-right" style={{ 
-            width: '250px',
+            width: '300px',
             display: 'flex',
             flexDirection: 'column',
             gap: '20px',
@@ -397,8 +398,8 @@ function Chatroom() {
               borderRadius: '4px',
               padding: '20px',
               overflowY: 'auto',
-              minHeight: 0,
-              background: 'white'
+              background: 'white',
+              minHeight: '300px'
             }}>
               <h4 style={{ margin: '0 0 16px 0', color: '#2c3e50' }}>Chat 成員</h4>
               {members.length > 0 ? (
@@ -427,7 +428,9 @@ function Chatroom() {
               )}
             </div>
 
-            <form className="chatroom-invite" onSubmit={inviteMember}>
+            <form className="chatroom-invite" onSubmit={inviteMember} style={{
+              flex: '0 0 auto'
+            }}>
               <input
                 type="email"
                 placeholder="輸入要邀請的 Email"

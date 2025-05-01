@@ -49,31 +49,106 @@ function App() {
   if (!user) {
     // 還沒登入的話顯示登入／註冊頁
     return (
-      <div className="App" style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center', padding: '40px' }}>
-        <h1>{isRegistering ? '註冊' : '登入'}</h1>
-        <form onSubmit={isRegistering ? handleRegister : handleLogin}>
-          <div>
-            <label>Email：</label>
+      <div className="App" style={{ 
+        maxWidth: '400px', 
+        margin: '40px auto',
+        padding: '40px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        borderRadius: '8px',
+        background: 'white'
+      }}>
+        <h1 style={{
+          fontSize: '32px',
+          marginBottom: '30px',
+          color: '#2c3e50'
+        }}>{isRegistering ? '註冊' : '登入'}</h1>
+        <form onSubmit={isRegistering ? handleRegister : handleLogin} style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '8px'
+          }}>
+            <label style={{
+              fontSize: '16px',
+              color: '#2c3e50'
+            }}>Email：</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontSize: '16px',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                boxSizing: 'border-box'
+              }}
             />
           </div>
-          <div>
-            <label>密碼：</label>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '8px'
+          }}>
+            <label style={{
+              fontSize: '16px',
+              color: '#2c3e50'
+            }}>密碼：</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontSize: '16px',
+                border: '1px solid #e0e0e0',
+                borderRadius: '4px',
+                boxSizing: 'border-box'
+              }}
             />
           </div>
-          <button type="submit">{isRegistering ? '註冊' : '登入'}</button>
+          <button 
+            type="submit" 
+            style={{
+              width: '100%',
+              padding: '12px',
+              fontSize: '16px',
+              background: '#FFF18A',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              marginTop: '10px',
+              transition: 'background 0.3s ease',
+              color: '#2c3e50',
+              fontWeight: '500'
+            }}
+          >
+            {isRegistering ? '註冊' : '登入'}
+          </button>
         </form>
-        <div style={{ marginTop: '10px' }}>
-          <button onClick={() => setIsRegistering(!isRegistering)}>
+        <div style={{ marginTop: '20px' }}>
+          <button 
+            onClick={() => setIsRegistering(!isRegistering)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: '14px',
+              textDecoration: 'underline',
+              padding: '8px'
+            }}
+          >
             {isRegistering ? '切換到登入' : '沒有帳號？點這裡註冊'}
           </button>
         </div>
@@ -93,7 +168,28 @@ function App() {
         overflow: 'hidden'
       }}>
         <style>{`
-          @media (max-width: 768px) {
+          @media (min-width: 1400px) {
+            .chatroom-list-container {
+              width: 25% !important;
+              min-width: 300px !important;
+              max-width: 450px !important;
+            }
+          }
+          @media (min-width: 992px) and (max-width: 1399px) {
+            .chatroom-list-container {
+              width: 30% !important;
+              min-width: 280px !important;
+              max-width: 400px !important;
+            }
+          }
+          @media (min-width: 768px) and (max-width: 991px) {
+            .chatroom-list-container {
+              width: 35% !important;
+              min-width: 250px !important;
+              max-width: 350px !important;
+            }
+          }
+          @media (max-width: 767px) {
             .chatroom-list-container {
               width: 120px !important;
               min-width: 120px !important;
@@ -105,8 +201,9 @@ function App() {
           }
         `}</style>
         <div className="chatroom-list-container" style={{ 
-          width: '300px',
-          minWidth: '300px',
+          width: '30%',
+          minWidth: '280px',
+          maxWidth: '400px',
           display: 'flex', 
           flexDirection: 'column',
           borderRight: '1px solid #e0e0e0'
