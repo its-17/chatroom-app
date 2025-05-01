@@ -18,6 +18,10 @@ import {
   where,
   deleteDoc
 } from 'firebase/firestore';
+import { setPersistence, browserSessionPersistence } from 'firebase/auth';
+
+// 這段放在 App 組件外層（或 useEffect 裡，保證只執行一次）
+setPersistence(auth, browserSessionPersistence);
 
 function Chatroom() {
   const { chatroomId } = useParams();
