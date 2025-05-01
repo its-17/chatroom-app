@@ -169,129 +169,248 @@ function Chatroom() {
   return (
     <>
       <style>{`
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           .chatroom-main {
             flex-direction: column !important;
-            gap: 12px !important;
           }
           .chatroom-left, .chatroom-right {
-            min-width: 0 !important;
             width: 100% !important;
-            max-width: 100% !important;
+            max-width: none !important;
+          }
+          .chatroom-right {
+            min-height: auto !important;
+          }
+          .chatroom-memberlist {
+            max-height: 200px !important;
           }
           .chatroom-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 8px !important;
+            padding: 10px 0 !important;
           }
           .chatroom-header h2 {
-            text-align: left !important;
-            font-size: 1.2rem !important;
-            margin-top: 8px !important;
+            font-size: 20px !important;
           }
-          .chatroom-btns {
-            gap: 4px !important;
+          .chatroom-msglist {
+            padding: 10px !important;
           }
-          .chatroom-msglist, .chatroom-memberlist {
-            max-height: 200px !important;
-            font-size: 0.95rem !important;
+          .chatroom-input {
+            margin-top: 10px !important;
           }
-          .chatroom-input input, .chatroom-invite input {
-            font-size: 1rem !important;
-            padding: 6px !important;
+          .chatroom-input input {
+            padding: 8px !important;
           }
         }
       `}</style>
       <div style={{
-        padding: '20px',
-        height: '100vh',
-        boxSizing: 'border-box',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        padding: '20px'
       }}>
-        <div className="chatroom-header" style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-          <div className="chatroom-btns" style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => auth.signOut()}>登出</button>
-            <button onClick={() => navigate(-1)}>⬅ 返回至聊天列表</button>
-          </div>
-          <h2 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{chatroomName || '聊天室'}</h2>
+        <div className="chatroom-header" style={{ 
+          padding: '0 0 20px 0',
+          borderBottom: '1px solid #e0e0e0',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{ 
+            margin: '0', 
+            fontSize: '24px',
+            fontWeight: '500',
+            color: '#2c3e50'
+          }}>
+            {chatroomName || '未命名聊天室'}
+          </h2>
         </div>
 
-        <div className="chatroom-main" style={{ display: 'flex', gap: '20px', flex: 1, overflow: 'hidden' }}>
-          <div className="chatroom-left" style={{ flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+        <div className="chatroom-main" style={{ 
+          display: 'flex',
+          gap: '20px',
+          flex: 1,
+          overflow: 'hidden',
+          minHeight: 0
+        }}>
+          <div className="chatroom-left" style={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
             <div className="chatroom-msglist" style={{
               flex: 1,
-              border: '1px solid #ccc',
-              padding: '10px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '4px',
+              padding: '20px',
               overflowY: 'auto',
-              marginBottom: 0,
-              minHeight: 0
+              marginBottom: '20px',
+              minHeight: 0,
+              background: 'white',
+              position: 'relative'
             }}>
-              <input
-                type="text"
-                placeholder="搜尋訊息內容"
-                value={searchText}
-                onChange={e => setSearchText(e.target.value)}
-                style={{ width: '100%', marginBottom: '10px', padding: '6px', boxSizing: 'border-box' }}
-              />
-              {messages
-                .filter(msg =>
-                  !searchText ||
-                  (msg.text && msg.text.toLowerCase().includes(searchText.toLowerCase())) ||
-                  (msg.originalText && msg.originalText.toLowerCase().includes(searchText.toLowerCase()))
-                )
-                .map((msg) => (
-                  <div key={msg.id} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
-                    <strong>{msg.email}</strong>：
-                    {msg.retracted ? (
-                      <>
-                        <span style={{ color: '#888', fontStyle: 'italic' }}>{msg.text}</span>
-                        {msg.email === auth.currentUser.email && msg.originalText && (
-                          <button onClick={() => restoreMessage(msg.id, msg.originalText)} style={{ marginLeft: 8, fontSize: '0.9em' }}>復原</button>
+              <div style={{
+                position: 'sticky',
+                top: 0,
+                background: 'white',
+                marginBottom: '20px',
+                zIndex: 1
+              }}>
+                <input
+                  type="text"
+                  placeholder="搜尋訊息內容"
+                  value={searchText}
+                  onChange={e => setSearchText(e.target.value)}
+                  style={{ 
+                    width: '100%',
+                    padding: '8px 12px',
+                    boxSizing: 'border-box',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '4px'
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {messages
+                  .filter(msg => 
+                    searchText === '' || 
+                    msg.text.toLowerCase().includes(searchText.toLowerCase())
+                  )
+                  .map((msg) => (
+                    <div key={msg.id} style={{ 
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px'
+                    }}>
+                      <strong style={{ 
+                        whiteSpace: 'nowrap',
+                        color: '#2c3e50'
+                      }}>
+                        {msg.email}
+                      </strong>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {msg.retracted ? (
+                          <>
+                            <span style={{ color: '#888', fontStyle: 'italic' }}>{msg.text}</span>
+                            {msg.email === auth.currentUser.email && msg.originalText && (
+                              <button 
+                                onClick={() => restoreMessage(msg.id, msg.originalText)}
+                                style={{ 
+                                  marginLeft: '8px',
+                                  padding: '2px 8px',
+                                  fontSize: '12px',
+                                  border: '1px solid #e0e0e0',
+                                  borderRadius: '4px',
+                                  background: 'white',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                復原
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ wordBreak: 'break-word' }}>{msg.text}</span>
+                            {msg.email === auth.currentUser.email && (
+                              <button 
+                                onClick={() => unsendMessage(msg.id, msg.text)}
+                                style={{ 
+                                  marginLeft: '8px',
+                                  padding: '2px 8px',
+                                  fontSize: '12px',
+                                  border: '1px solid #e0e0e0',
+                                  borderRadius: '4px',
+                                  background: 'white',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                收回
+                              </button>
+                            )}
+                          </>
                         )}
-                      </>
-                    ) : (
-                      <>
-                        {msg.text}
-                        {msg.email === auth.currentUser.email && (
-                          <button onClick={() => unsendMessage(msg.id, msg.text)} style={{ marginLeft: 8, fontSize: '0.9em' }}>收回</button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
 
-            <form className="chatroom-input" onSubmit={sendMessage} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '8px 0', background: '#fff' }}>
+            <form 
+              className="chatroom-input" 
+              onSubmit={sendMessage} 
+              style={{ 
+                display: 'flex',
+                gap: '12px'
+              }}
+            >
               <input
                 type="text"
                 value={message}
-                placeholder="輸入訊息"
+                placeholder={`以 ${auth.currentUser.email} 的身分輸入訊息...`}
                 onChange={(e) => setMessage(e.target.value)}
-                style={{ flex: 1, padding: '8px' }}
+                style={{ 
+                  flex: 1,
+                  padding: '12px',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               />
-              <button type="submit" style={{ marginLeft: '8px' }}>送出</button>
+              <button 
+                type="submit"
+                style={{ 
+                  padding: '0 24px',
+                  whiteSpace: 'nowrap',
+                  background: '#FFF18A',
+                  color: '#000000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                送出
+              </button>
             </form>
           </div>
 
-          <div className="chatroom-right" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="chatroom-right" style={{ 
+            width: '250px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+          }}>
             <div className="chatroom-memberlist" style={{ 
-              maxHeight: 'calc(100vh - 300px)', 
+              flex: 1,
+              border: '1px solid #e0e0e0',
+              borderRadius: '4px',
+              padding: '20px',
               overflowY: 'auto',
-              border: '1px solid #ccc',
-              padding: '10px',
-              marginBottom: '10px'
+              minHeight: 0,
+              background: 'white'
             }}>
-              <h4>聊天室成員：</h4>
+              <h4 style={{ margin: '0 0 16px 0', color: '#2c3e50' }}>Chat 成員</h4>
               {members.length > 0 ? (
-                <ul style={{ listStyle: 'none', padding: 0 }}>
+                <div style={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
                   {members.map((member, index) => (
-                    <li key={index}>{member}</li>
+                    <div 
+                      key={index}
+                      style={{
+                        padding: '8px 12px',
+                        background: '#f8f9fa',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {member}
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p>暫無成員</p>
+                <p style={{ color: '#666' }}>暫無成員</p>
               )}
             </div>
 
@@ -301,9 +420,31 @@ function Chatroom() {
                 placeholder="輸入要邀請的 Email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                style={{ width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' }}
+                style={{ 
+                  width: '100%',
+                  padding: '8px 12px',
+                  marginBottom: '12px',
+                  boxSizing: 'border-box',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
               />
-              <button type="submit" style={{ width: '100%' }}>邀請成員</button>
+              <button 
+                type="submit"
+                style={{ 
+                  width: '100%',
+                  padding: '8px',
+                  background: '#FFF18A',
+                  color: '#000000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                邀請成員
+              </button>
             </form>
           </div>
         </div>

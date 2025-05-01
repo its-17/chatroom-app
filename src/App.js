@@ -3,8 +3,7 @@ import { auth } from './firebase';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from 'firebase/auth';
 
 import {
@@ -85,20 +84,45 @@ function App() {
   // 已經登入的話，顯示聊天室頁面（可以切換不同聊天室）
   return (
     <Router>
-      <div style={{ padding: '20px' }}>
-        <Routes>
-          <Route path="/" element={
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '8px' }}>
-                <button onClick={() => signOut(auth)}>
-                  登出
-                </button>
+      <div style={{ 
+        padding: '0', 
+        height: '100vh',
+        display: 'flex',
+        gap: '0',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
+      }}>
+        <div style={{ 
+          width: '300px', 
+          display: 'flex', 
+          flexDirection: 'column',
+          borderRight: '1px solid #e0e0e0'
+        }}>
+          <ChatroomList />
+        </div>
+        
+        <div style={{ 
+          flex: 1, 
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          minWidth: 0
+        }}>
+          <Routes>
+            <Route path="/" element={
+              <div style={{ 
+                height: '100%',
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                color: '#666'
+              }}>
+                請選擇或建立一個聊天室
               </div>
-              <ChatroomList />
-            </>
-          } />
-          <Route path="/chatroom/:chatroomId" element={<Chatroom />} />
-        </Routes>
+            } />
+            <Route path="/chatroom/:chatroomId" element={<Chatroom />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );
