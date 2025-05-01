@@ -248,6 +248,82 @@ function Chatroom() {
   return (
     <>
       <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes shake {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
+        }
+
+        .message-item {
+          animation: slideIn 0.3s ease-out;
+        }
+
+        .block-button {
+          transition: all 0.3s ease;
+        }
+
+        .block-button:hover {
+          transform: scale(1.1);
+        }
+
+        .block-button.blocked {
+          animation: shake 0.5s ease-in-out;
+        }
+
+        .retracted-message {
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .chatroom-container {
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        .chatroom-memberlist {
+          animation: slideIn 0.5s ease-out;
+        }
+
+        .chatroom-input input:focus {
+          animation: pulse 0.3s ease-out;
+        }
+
         @media (max-width: 768px) {
           .chatroom-container {
             display: flex !important;
@@ -364,7 +440,7 @@ function Chatroom() {
                     msg.text.toLowerCase().includes(searchText.toLowerCase())
                   )
                   .map((msg) => (
-                    <div key={msg.id} style={{ 
+                    <div key={msg.id} className="message-item" style={{ 
                       display: 'flex',
                       alignItems: 'flex-start',
                       gap: '12px'
@@ -383,7 +459,7 @@ function Chatroom() {
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {msg.retracted ? (
-                          <>
+                          <div className="retracted-message">
                             <span style={{ color: '#888', fontStyle: 'italic' }}>{msg.text}</span>
                             {msg.email === auth.currentUser.email && msg.originalText && (
                               <button 
@@ -401,7 +477,7 @@ function Chatroom() {
                                 復原
                               </button>
                             )}
-                          </>
+                          </div>
                         ) : (
                           <>
                             <span style={{ wordBreak: 'break-word' }}>{msg.text}</span>
@@ -523,6 +599,7 @@ function Chatroom() {
                         {memberUid && (
                           <button
                             onClick={() => toggleBlockUser(member, memberUid)}
+                            className={`block-button ${blockedUids.includes(memberUid) ? 'blocked' : ''}`}
                             style={{
                               padding: '4px 8px',
                               fontSize: '12px',

@@ -1,14 +1,12 @@
 已實作功能列表：
 
 #1.Basic components
-- [x] Email 註冊 / 登入
-- [x] Firebase Hosting 上線部署
-- [x] Firebase Firestore 資料庫讀寫（需登入才可操作）
-- [x] 響應式設計（手機/平板/電腦皆可正常顯示）
-- [x] Git 版本控制（請見下方 git log 截圖或連結）
-- [x] 私密聊天室系統（僅成員可加入、留言與讀取）
-
-進入頁面後
+- [x] Membership Mechanism (5%)
+- [x] Host your Firebase page (5%)
+- [x] Database read/write (15%)
+- [x] RWD (15%)
+- [x] Git (5%)
+- [x] Chatroom (20%)
 
 
 #2.Advanced components
@@ -21,8 +19,9 @@
 - [x] Sign Up/In with Google or other third-party accounts (1%)
 在登入頁面的下方有使用google account signin的選項
 
-- [ ] Use CSS animation (2%)
-- [ ] Deal with problems when sending code (2%)
+- [x] Use CSS animation (2%)
+在新訊息被傳送的時候會有從下面滑入的動畫。
+- [x] Deal with problems when sending code (2%)
 
 #3.Bonus Components
 - [ ] User profile (1%)
