@@ -13,7 +13,9 @@ import {
   updateDoc,
   setDoc,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  getDocs,
+  where
 } from 'firebase/firestore';
 
 function Chatroom() {
@@ -29,6 +31,7 @@ function Chatroom() {
   const hasRedirectedRef = useRef(false);
   const [searchText, setSearchText] = useState('');
   const messagesEndRef = useRef(null);
+  const [memberUids, setMemberUids] = useState({});
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -132,6 +135,28 @@ function Chatroom() {
       });
     }
   }, [messages]);
+
+  // 在 useEffect 中獲取所有成員的 uid
+  useEffect(() => {
+    const fetchMemberUids = async () => {
+      const uidMap = {};
+      for (const memberEmail of members) {
+        const q = query(
+          collection(db, 'users'),
+          where('email', '==', memberEmail)
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          uidMap[memberEmail] = snapshot.docs[0].id;
+        }
+      }
+      setMemberUids(uidMap);
+    };
+    
+    if (members.length > 0) {
+      fetchMemberUids();
+    }
+  }, [members]);
 
   // block/unblock
   const toggleBlockUser = async (targetEmail, targetUid) => {
@@ -355,22 +380,6 @@ function Chatroom() {
                         }}>
                           {msg.email}
                         </strong>
-                        {msg.email !== auth.currentUser.email && (
-                          <button
-                            onClick={() => toggleBlockUser(msg.email, msg.uid)}
-                            style={{
-                              padding: '2px 8px',
-                              fontSize: '12px',
-                              border: '1px solid #e0e0e0',
-                              borderRadius: '4px',
-                              background: 'white',
-                              cursor: 'pointer',
-                              color: blockedUids.includes(msg.uid) ? '#ff4444' : '#666'
-                            }}
-                          >
-                            {blockedUids.includes(msg.uid) ? '解除封鎖' : '封鎖'}
-                          </button>
-                        )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {msg.retracted ? (
@@ -485,20 +494,52 @@ function Chatroom() {
                   flexDirection: 'column',
                   gap: '8px'
                 }}>
-                  {members.map((member, index) => (
-                    <div 
-                      key={index}
-                      style={{
-                        padding: '8px 12px',
-                        background: '#f8f9fa',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        wordBreak: 'break-all'
-                      }}
-                    >
-                      {member}
-                    </div>
-                  ))}
+                  {members.map((member, index) => {
+                    // 跳過自己
+                    if (member === auth.currentUser.email) return null;
+                    
+                    const memberUid = memberUids[member];
+                    
+                    return (
+                      <div 
+                        key={index}
+                        style={{
+                          padding: '8px 12px',
+                          background: '#f8f9fa',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        <span style={{ 
+                          wordBreak: 'break-all',
+                          flex: '1'
+                        }}>
+                          {member}
+                        </span>
+                        {memberUid && (
+                          <button
+                            onClick={() => toggleBlockUser(member, memberUid)}
+                            style={{
+                              padding: '4px 8px',
+                              fontSize: '12px',
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '4px',
+                              background: 'white',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              color: blockedUids.includes(memberUid) ? '#ff4444' : '#666'
+                            }}
+                          >
+                            {blockedUids.includes(memberUid) ? '解除封鎖' : '封鎖'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p style={{ color: '#666' }}>暫無成員</p>
