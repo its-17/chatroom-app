@@ -25,10 +25,16 @@ function ChatroomList() {
     e.preventDefault();
     if (!newChatroomName.trim()) return;
 
+    console.log('建立聊天室時的 user:', auth.currentUser);
+    if (!auth.currentUser || !auth.currentUser.email) {
+      alert('尚未登入或使用者資料尚未載入，請稍後再試');
+      return;
+    }
+
     try {
       const docRef = await addDoc(collection(db, 'chatrooms'), {
         name: newChatroomName,
-        members: [auth.currentUser.email] // ⚡ 建立聊天室時直接加入自己
+        members: [auth.currentUser.email]
       });
       setNewChatroomName('');
       navigate(`/chatroom/${docRef.id}`);

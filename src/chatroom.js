@@ -15,7 +15,8 @@ import {
   arrayUnion,
   arrayRemove,
   getDocs,
-  where
+  where,
+  deleteDoc
 } from 'firebase/firestore';
 
 function Chatroom() {
@@ -77,8 +78,16 @@ function Chatroom() {
       const chatroomSnap = await getDoc(chatroomRef);
       if (chatroomSnap.exists()) {
         const data = chatroomSnap.data();
+        console.log('聊天室資料:', data);
+        console.log('目前使用者:', auth.currentUser.email);
+        console.log('成員列表:', data.members);
         setChatroomName(data.name || '');
         if (!Array.isArray(data.members) || !data.members.includes(auth.currentUser.email)) {
+          console.log('成員檢查失敗:', {
+            isArray: Array.isArray(data.members),
+            members: data.members,
+            currentUser: auth.currentUser.email
+          });
           if (!hasRedirectedRef.current) {
             hasRedirectedRef.current = true;
             alert('你不是這個聊天室的成員！');
@@ -103,6 +112,7 @@ function Chatroom() {
           setMessages(filteredMsgs);
         });
       } else {
+        console.log('聊天室不存在:', chatroomId);
         if (!hasRedirectedRef.current) {
           hasRedirectedRef.current = true;
           alert('聊天室不存在！');
@@ -116,24 +126,48 @@ function Chatroom() {
   }, [chatroomId, navigate, blockedUids, blockedByUids]);
 
   useEffect(() => {
-    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
+    const requestNotificationPermission = async () => {
+      try {
+        if (typeof Notification === 'undefined') {
+          console.log('此瀏覽器不支援通知功能');
+          return;
+        }
+        
+        if (Notification.permission === 'default') {
+          const permission = await Notification.requestPermission();
+          console.log('通知權限狀態:', permission);
+        }
+      } catch (error) {
+        console.log('請求通知權限時發生錯誤:', error);
+      }
+    };
+    
+    requestNotificationPermission();
   }, []);
 
   useEffect(() => {
     if (!messages.length) return;
+    
+    const showNotification = async (msg) => {
+      try {
+        if (
+          typeof Notification !== 'undefined' &&
+          Notification.permission === 'granted' &&
+          msg.email !== auth.currentUser.email &&
+          document.visibilityState !== 'visible'
+        ) {
+          await new Notification(`來自 ${msg.email} 的新訊息`, {
+            body: msg.text,
+            icon: '/favicon.ico' // 使用網站的 favicon 作為通知圖示
+          });
+        }
+      } catch (error) {
+        console.log('顯示通知時發生錯誤:', error);
+      }
+    };
+
     const latestMsg = messages[messages.length - 1];
-    if (
-      latestMsg.email !== auth.currentUser.email &&
-      document.visibilityState !== 'visible' &&
-      Notification.permission === 'granted'
-    ) {
-      new Notification(`來自 ${latestMsg.email} 的新訊息`, {
-        body: latestMsg.text
-        // icon: '/icon.png' // 你可以加icon在public資料夾
-      });
-    }
+    showNotification(latestMsg);
   }, [messages]);
 
   // 在 useEffect 中獲取所有成員的 uid
@@ -245,8 +279,19 @@ function Chatroom() {
     });
   };
 
+  const deleteChatroom = async (chatroomId) => {
+    if (!window.confirm('確定要刪除這個聊天室嗎？此動作無法復原！')) return;
+    try {
+      await deleteDoc(doc(db, 'chatrooms', chatroomId));
+      alert('聊天室已刪除');
+    } catch (error) {
+      alert('刪除失敗：' + error.message);
+    }
+  };
+
   return (
     <>
+      {console.log('渲染時的成員列表:', members)}
       <style>{`
         @keyframes slideIn {
           from {
@@ -571,9 +616,6 @@ function Chatroom() {
                   gap: '8px'
                 }}>
                   {members.map((member, index) => {
-                    // 跳過自己
-                    if (member === auth.currentUser.email) return null;
-                    
                     const memberUid = memberUids[member];
                     
                     return (
