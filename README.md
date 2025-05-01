@@ -1,4 +1,4 @@
-## 🧩 功能列表
+已實作功能列表：
 
 #1.Basic components
 - [x] Email 註冊 / 登入
@@ -11,14 +11,23 @@
 進入頁面後
 
 
-### 🚀 進階功能（最多 +30%）
-- [x] 使用 React 框架開發
-- [x] Chrome 推播通知
-- [ ] 第三方登入（尚未完成）
-- [ ] CSS 動畫（尚未實作）
-- [ ] 防止 script/html 注入攻擊（尚未實作）
+#2.Advanced components
+- [x] Using React (10%)
+- [x] Add Chrome notification (5%) 
+- [x] Sign Up/In with Google or other third-party accounts (1%)
+- [ ] Use CSS animation (2%)
+- [ ] Deal with problems when sending code (2%)
 
-### 🎁 加分功能（最多 +10%）
-- [x] 收回訊息（可復原）
-- [x] 搜尋訊息內容
-- [ ] 圖片 / 影片 / GIF / Chatbot（尚未實作）
+#3.Bonus Components
+- [ ] User profile (1%)
+- [ ] Profile picture (1%)
+- [ ] Send image (1%)
+- [ ] Send video (1%)
+- [ ] Chatbot (2%)
+- [ ] Block User (2%) 
+- [x] Unsend message (3%)
+- [x] Search for message (3%)
+- [ ] Send gif from Tenor API (3%)
+
+
+

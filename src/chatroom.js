@@ -24,6 +24,16 @@ function Chatroom() {
   const [members, setMembers] = useState([]);
   const hasRedirectedRef = useRef(false);
   const [searchText, setSearchText] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // 當訊息更新時自動滾動
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     let unsubMessages = null;
@@ -341,6 +351,7 @@ function Chatroom() {
                       </div>
                     </div>
                   ))}
+                <div ref={messagesEndRef} />
               </div>
             </div>
 
