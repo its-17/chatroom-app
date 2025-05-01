@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { auth, googleProvider } from './firebase';
+import { auth, googleProvider, db } from './firebase';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithPopup
 } from 'firebase/auth';
+import {
+  doc,
+  setDoc
+} from 'firebase/firestore';
 
 import {
   BrowserRouter as Router,
@@ -33,14 +37,27 @@ function App() {
   const handleLogin = (e) => {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
-      .then(() => alert('登入成功！'))
+      .then(async (result) => {
+        // 創建或更新使用者資訊
+        await setDoc(doc(db, 'users', result.user.uid), {
+          email: result.user.email,
+          lastLogin: new Date()
+        }, { merge: true });
+        alert('登入成功！');
+      })
       .catch((error) => alert('登入失敗：' + error.message));
   };
 
   const handleRegister = (e) => {
     e.preventDefault();
     createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
+      .then(async (result) => {
+        // 創建使用者資訊
+        await setDoc(doc(db, 'users', result.user.uid), {
+          email: result.user.email,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
         alert('註冊成功！');
         setIsRegistering(false);
       })
@@ -49,8 +66,15 @@ function App() {
 
   const handleGoogleLogin = () => {
     signInWithPopup(auth, googleProvider)
-      .then((result) => {
+      .then(async (result) => {
         console.log('Google 登入成功！', result.user);
+        // 創建或更新使用者資訊
+        await setDoc(doc(db, 'users', result.user.uid), {
+          email: result.user.email,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          lastLogin: new Date()
+        }, { merge: true });
       })
       .catch((error) => {
         console.error('Google 登入失敗：', {

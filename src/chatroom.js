@@ -11,7 +11,9 @@ import {
   doc,
   getDoc,
   updateDoc,
-  updateDoc as updateMessageDoc
+  setDoc,
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore';
 
 function Chatroom() {
@@ -22,6 +24,8 @@ function Chatroom() {
   const [messages, setMessages] = useState([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [members, setMembers] = useState([]);
+  const [blockedUids, setBlockedUids] = useState([]);
+  const [blockedByUids, setBlockedByUids] = useState([]);
   const hasRedirectedRef = useRef(false);
   const [searchText, setSearchText] = useState('');
   const messagesEndRef = useRef(null);
@@ -35,17 +39,42 @@ function Chatroom() {
     scrollToBottom();
   }, [messages]);
 
+  // 監聽自己 block list
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    const ref = doc(db, 'userBlockLists', auth.currentUser.uid);
+    const unsub = onSnapshot(ref, (snap) => {
+      setBlockedUids(snap.exists() ? (snap.data().blockedUids || []) : []);
+    });
+    return unsub;
+  }, []);
+
+  // 監聽所有 block list，找出封鎖自己的 user
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    const q = query(collection(db, 'userBlockLists'));
+    const unsub = onSnapshot(q, (snap) => {
+      const blockedBy = [];
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        if (Array.isArray(data.blockedUids) && data.blockedUids.includes(auth.currentUser.uid)) {
+          blockedBy.push(docSnap.id);
+        }
+      });
+      setBlockedByUids(blockedBy);
+    });
+    return unsub;
+  }, []);
+
+  // 訊息過濾
   useEffect(() => {
     let unsubMessages = null;
-
     const checkPermission = async () => {
       const chatroomRef = doc(db, 'chatrooms', chatroomId);
       const chatroomSnap = await getDoc(chatroomRef);
-
       if (chatroomSnap.exists()) {
         const data = chatroomSnap.data();
         setChatroomName(data.name || '');
-
         if (!Array.isArray(data.members) || !data.members.includes(auth.currentUser.email)) {
           if (!hasRedirectedRef.current) {
             hasRedirectedRef.current = true;
@@ -54,9 +83,7 @@ function Chatroom() {
           }
           return;
         }
-
         setMembers(data.members || []);
-
         const q = query(
           collection(db, 'chatrooms', chatroomId, 'messages'),
           orderBy('createdAt')
@@ -66,7 +93,11 @@ function Chatroom() {
             id: doc.id,
             ...doc.data()
           }));
-          setMessages(msgs);
+          // 過濾：不是你封鎖的，也不是封鎖你的
+          const filteredMsgs = msgs.filter(msg => {
+            return !blockedUids.includes(msg.uid) && !blockedByUids.includes(msg.uid);
+          });
+          setMessages(filteredMsgs);
         });
       } else {
         if (!hasRedirectedRef.current) {
@@ -77,13 +108,9 @@ function Chatroom() {
         return;
       }
     };
-
     checkPermission();
-
-    return () => {
-      if (unsubMessages) unsubMessages();
-    };
-  }, [chatroomId, navigate]);
+    return () => { if (unsubMessages) unsubMessages(); };
+  }, [chatroomId, navigate, blockedUids, blockedByUids]);
 
   useEffect(() => {
     if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
@@ -106,6 +133,23 @@ function Chatroom() {
     }
   }, [messages]);
 
+  // block/unblock
+  const toggleBlockUser = async (targetEmail, targetUid) => {
+    if (targetEmail === auth.currentUser.email) {
+      alert('不能封鎖自己');
+      return;
+    }
+    const myBlockRef = doc(db, 'userBlockLists', auth.currentUser.uid);
+    if (blockedUids.includes(targetUid)) {
+      await updateDoc(myBlockRef, { blockedUids: arrayRemove(targetUid) });
+      alert(`已解除封鎖 ${targetEmail}`);
+    } else {
+      await setDoc(myBlockRef, { blockedUids: arrayUnion(targetUid) }, { merge: true });
+      alert(`已封鎖 ${targetEmail}`);
+    }
+  };
+
+  // 修改發送訊息功能
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -159,7 +203,7 @@ function Chatroom() {
   // 收回訊息功能
   const unsendMessage = async (msgId, text) => {
     const msgRef = doc(db, 'chatrooms', chatroomId, 'messages', msgId);
-    await updateMessageDoc(msgRef, {
+    await updateDoc(msgRef, {
       originalText: text,
       text: '此訊息已被收回',
       retracted: true
@@ -169,7 +213,7 @@ function Chatroom() {
   // 復原訊息功能
   const restoreMessage = async (msgId, originalText) => {
     const msgRef = doc(db, 'chatrooms', chatroomId, 'messages', msgId);
-    await updateMessageDoc(msgRef, {
+    await updateDoc(msgRef, {
       text: originalText,
       retracted: false,
       originalText: ''
@@ -300,12 +344,34 @@ function Chatroom() {
                       alignItems: 'flex-start',
                       gap: '12px'
                     }}>
-                      <strong style={{ 
-                        whiteSpace: 'nowrap',
-                        color: '#2c3e50'
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
                       }}>
-                        {msg.email}
-                      </strong>
+                        <strong style={{ 
+                          whiteSpace: 'nowrap',
+                          color: '#2c3e50'
+                        }}>
+                          {msg.email}
+                        </strong>
+                        {msg.email !== auth.currentUser.email && (
+                          <button
+                            onClick={() => toggleBlockUser(msg.email, msg.uid)}
+                            style={{
+                              padding: '2px 8px',
+                              fontSize: '12px',
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '4px',
+                              background: 'white',
+                              cursor: 'pointer',
+                              color: blockedUids.includes(msg.uid) ? '#ff4444' : '#666'
+                            }}
+                          >
+                            {blockedUids.includes(msg.uid) ? '解除封鎖' : '封鎖'}
+                          </button>
+                        )}
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {msg.retracted ? (
                           <>
